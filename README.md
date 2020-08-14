@@ -14,4 +14,4 @@ Use the `Auth0RedirectRuleUtilities` class in rules that need to redirect users
 outside of the Rules pipeline to collect information or run additional
 validation.
 
-**[See an example here 👉](https://github.com/auth0/rule-utilities/examples/redirectRuleExample.js)**
+**[See an example here 👉](https://github.com/auth0/rule-utilities/blob/master/examples/redirectRuleExample.js)**
