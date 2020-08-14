@@ -1,4 +1,15 @@
 /* global configuration */
+
+/**
+ * Exmaple Rule to redirect for verification and store the result in the user meta.
+ * Use Rules configuration to define:
+ *    - SESSION_TOKEN_SECRET: Long, random string
+ *    - ID_VERIFICATION_URL: URL to receive the redirect
+ *
+ * @param {object} user
+ * @param {object} context
+ * @param {function} callback
+ */
 function redirectRuleExample(user, context, callback) {
   const { Auth0RedirectRuleUtilities } = require("@auth0/rule-utilities@0.1.0");
 
@@ -25,7 +36,7 @@ function redirectRuleExample(user, context, callback) {
   }
 
   // Some kind of context check occurred to determine if a redirect should happen.
-  if (!user.app_metadata || !user.app_metadata.is_verified) {
+  if (ruleUtils.canRedirect && (!user.app_metadata || !user.app_metadata.is_verified)) {
     try {
       ruleUtils.doRedirect(configuration.ID_VERIFICATION_URL);
       callback(null, user, context);
