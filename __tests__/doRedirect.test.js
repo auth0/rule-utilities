@@ -1,0 +1,50 @@
+const faker = require("faker");
+
+const { Auth0RedirectRuleUtilities, noRedirectProtocols } = require("../src");
+
+describe("doRedirect()", () => {
+  let mockContext;
+  let mockUser;
+  let tokenSecret;
+
+  beforeEach(() => {
+    tokenSecret = faker.random.alphaNumeric(12);
+
+    mockContext = {
+      request: {
+        query: {},
+      },
+    };
+
+    mockUser = {
+      user_id: faker.random.alphaNumeric(12),
+      rule_nonce: faker.random.alphaNumeric(12),
+    };
+  });
+
+  it("throws an error if it cannot redirect", () => {
+    mockContext.protocol = noRedirectProtocols[0];
+    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext);
+
+    let error;
+    try {
+      util.doRedirect(mockContext);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toEqual(new Error("Cannot redirect"));
+  });
+
+  it("sets the redirect URL in context", () => {
+    const redirectUrl = faker.internet.url();
+    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
+      SESSION_TOKEN_SECRET: tokenSecret,
+    });
+
+    util.doRedirect(redirectUrl);
+
+    expect(mockContext.redirect.url.split("=")[0]).toEqual(
+      `${redirectUrl}?sessionToken`
+    );
+  });
+});
