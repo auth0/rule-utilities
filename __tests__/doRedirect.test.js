@@ -1,13 +1,13 @@
 const faker = require("faker");
 
-const { Auth0RuleUtilities, noRedirectProtocols } = require("../src");
+const { Auth0RedirectRuleUtilities, noRedirectProtocols } = require("../src");
 
 describe("doRedirect()", () => {
   let mockContext;
   let mockUser;
   let tokenSecret;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     tokenSecret = faker.random.alphaNumeric(12);
 
     mockContext = {
@@ -22,27 +22,29 @@ describe("doRedirect()", () => {
     };
   });
 
-  it("throws an error if it cannot redirect", async () => {
+  it("throws an error if it cannot redirect", () => {
     mockContext.protocol = noRedirectProtocols[0];
-    const util = new Auth0RuleUtilities(mockContext);
+    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext);
 
     let error;
     try {
-      await util.doRedirect(mockContext);
+      util.doRedirect(mockContext);
     } catch (e) {
       error = e;
     }
     expect(error).toEqual(new Error("Cannot redirect"));
   });
 
-  it("sets the redirect URL in context", async () => {
+  it("sets the redirect URL in context", () => {
     const redirectUrl = faker.internet.url();
-    const util = new Auth0RuleUtilities(mockContext, mockUser, {
+    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
       SESSION_TOKEN_SECRET: tokenSecret,
     });
 
-    await util.doRedirect(redirectUrl);
+    util.doRedirect(redirectUrl);
 
-    expect(mockContext.redirect.url.split("=")[0]).toEqual(`${redirectUrl}?sessionToken`);
+    expect(mockContext.redirect.url.split("=")[0]).toEqual(
+      `${redirectUrl}?sessionToken`
+    );
   });
 });

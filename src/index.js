@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { promisify } = require("util");
 
 const noRedirectProtocols = [
   "oauth2-resource-owner",
@@ -9,15 +8,15 @@ const noRedirectProtocols = [
   "redirect-callback",
 ];
 
-class Auth0RuleUtilities {
-  constructor(context, user, configuration) {
+class Auth0RedirectRuleUtilities {
+  constructor(user, context, configuration) {
     this.context = context || {};
     this.user = user || {};
     this.tokenSecret = configuration && configuration.SESSION_TOKEN_SECRET;
     this.noRedirectProtocols = noRedirectProtocols;
 
-    this.verify = promisify(jwt.verify);
-    this.sign = promisify(jwt.sign);
+    this.verify = jwt.verify;
+    this.sign = jwt.sign;
   }
 
   get redirectUrl() {
@@ -30,6 +29,10 @@ class Auth0RuleUtilities {
 
   get protocolCanRedirect() {
     return !this.noRedirectProtocols.includes(this.context.protocol);
+  }
+
+  get isRedirectCallback() {
+    return this.context.protocol === "redirect-callback";
   }
 
   get canRedirect() {
@@ -55,21 +58,22 @@ class Auth0RuleUtilities {
     return this.protocolCanRedirect;
   }
 
-  async createSessionToken() {
+  createSessionToken(additionalClaims = {}) {
     this.user.rule_nonce = crypto.randomBytes(32).toString("hex");
 
     const sessionToken = {
       ip: this.context.request.ip,
       sub: this.user.user_id,
       nonce: this.user.rule_nonce,
+      ...additionalClaims
     };
 
-    return await this.sign(sessionToken, this.tokenSecret);
+    return this.sign(sessionToken, this.tokenSecret);
   }
 
-  async validateSessionToken() {
+  validateSessionToken() {
     const jwt = this.queryParams.sessionToken;
-    const payload = await this.verify(jwt, this.tokenSecret);
+    const payload = this.verify(jwt, this.tokenSecret);
     const { nonce, sub, ...params } = payload;
 
     if (nonce !== this.user.rule_nonce) {
@@ -83,12 +87,12 @@ class Auth0RuleUtilities {
     return params;
   }
 
-  async doRedirect(url) {
+  doRedirect(url) {
     if (!this.canRedirect) {
       throw new Error("Cannot redirect");
     }
 
-    const token = await this.createSessionToken();
+    const token = this.createSessionToken();
     this.context.redirect = {
       url: `${url}?sessionToken=${token}`,
     };
@@ -96,6 +100,6 @@ class Auth0RuleUtilities {
 }
 
 module.exports = {
-  Auth0RuleUtilities,
+  Auth0RedirectRuleUtilities,
   noRedirectProtocols,
 };
