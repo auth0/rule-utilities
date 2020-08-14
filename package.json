@@ -1,0 +1,33 @@
+{
+  "name": "@auth0/rule-utilities",
+  "version": "0.1.0",
+  "description": "Utility functions for use within Auth0 Rules",
+  "main": "src/index.js",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "jsonwebtoken": "^8.5.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.1",
+    "faker": "^4.1",
+    "jest": "^25.4",
+    "prettier": "^2.0"
+  },
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint",
+    "test:watch": "jest --verbose --watch",
+    "test:coverage": "jest --coverage",
+    "format": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/auth0/rule-utilities.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/auth0/rule-utilities/issues"
+  },
+  "homepage": "https://github.com/auth0/rule-utilities#readme"
+}
