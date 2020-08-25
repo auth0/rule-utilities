@@ -9,12 +9,14 @@ describe("validateSessionToken()", () => {
   let tokenSecret;
   let sessionToken;
   let signedSessionToken;
+  let issuerHost;
 
   beforeEach(() => {
     tokenSecret = faker.random.alphaNumeric(12);
+    issuerHost = faker.random.alphaNumeric(12);
 
     sessionToken = {
-      nonce: faker.random.alphaNumeric(12),
+      iss: `https://${issuerHost}/`,
       sub: faker.random.alphaNumeric(12),
       prop: faker.random.alphaNumeric(12),
     };
@@ -23,6 +25,7 @@ describe("validateSessionToken()", () => {
 
     mockContext = {
       request: {
+        hostname: faker.random.alphaNumeric(12),
         query: {
           sessionToken: signedSessionToken,
         },
@@ -35,25 +38,66 @@ describe("validateSessionToken()", () => {
     };
   });
 
-  it("throws an error if the token nonce does not match the user", () => {
+  it("throws an error if there is no expiration", () => {
+    mockUser.user_id = sessionToken.sub;
+    mockContext.request.hostname = issuerHost;
+    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
+      SESSION_TOKEN_SECRET: tokenSecret,
+    });
+    expect(() => util.validateSessionToken()).toThrowError("Expired token");
+  });
+
+  it("throws an error if the token is expired", () => {
+    mockUser.user_id = sessionToken.sub;
+    mockContext.request.hostname = issuerHost;
+    sessionToken.exp = Date.now() / 1000 - 1;
+    mockContext.request.query.sessionToken = jwt.sign(
+      sessionToken,
+      tokenSecret
+    );
+    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
+      SESSION_TOKEN_SECRET: tokenSecret,
+    });
+    expect(() => util.validateSessionToken()).toThrowError("jwt expired");
+  });
+
+  it("throws an error if the token sub does not match the user", () => {
+    mockContext.request.hostname = issuerHost;
+    sessionToken.exp = Date.now() / 1000 + 999;
+    mockContext.request.query.sessionToken = jwt.sign(
+      sessionToken,
+      tokenSecret
+    );
     const util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
       SESSION_TOKEN_SECRET: tokenSecret,
     });
     expect(() => util.validateSessionToken()).toThrowError(
-      "Invalid session nonce"
+      `jwt subject invalid. expected: ${mockUser.user_id}`
     );
   });
 
-  it("throws an error if the token sub does not match the user", () => {
-    mockUser.rule_nonce = sessionToken.nonce;
+  it("throws an error if the token iss does not match host", () => {
+    mockUser.user_id = sessionToken.sub;
+    sessionToken.exp = Date.now() / 1000 + 999;
+    mockContext.request.query.sessionToken = jwt.sign(
+      sessionToken,
+      tokenSecret
+    );
     const util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
       SESSION_TOKEN_SECRET: tokenSecret,
     });
-    expect(() => util.validateSessionToken()).toThrowError("Invalid user");
+    expect(() => util.validateSessionToken()).toThrowError(
+      `jwt issuer invalid. expected: https://${mockContext.request.hostname}/`
+    );
   });
 
   it("returns the validated token if checks pass", () => {
-    mockUser.rule_nonce = sessionToken.nonce;
+    mockContext.request.hostname = issuerHost;
+    sessionToken.exp = Date.now() / 1000 + 999;
+    mockContext.request.query.sessionToken = jwt.sign(
+      sessionToken,
+      tokenSecret
+    );
     mockUser.user_id = sessionToken.sub;
     const util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
       SESSION_TOKEN_SECRET: tokenSecret,
