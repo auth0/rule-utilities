@@ -14,6 +14,7 @@ describe("createSessionToken()", () => {
     mockContext = {
       request: {
         ip: faker.random.alphaNumeric(12),
+        hostname: faker.random.alphaNumeric(12),
       },
     };
 
@@ -34,12 +35,14 @@ describe("createSessionToken()", () => {
     expect(verifiedToken.sub).toEqual(mockUser.user_id);
   });
 
-  it("sets the nonce in the token", () => {
-    expect(verifiedToken.nonce).toEqual(mockUser.rule_nonce);
+  it("sets the exp in the token", () => {
+    expect(verifiedToken.exp).toBeGreaterThan(Date.now() / 1000);
   });
 
-  it("sets a long-enough nonce", () => {
-    expect(verifiedToken.nonce.length).toEqual(64);
+  it("sets the iss in the token", () => {
+    expect(verifiedToken.iss).toEqual(
+      `https://${mockContext.request.hostname}/`
+    );
   });
 
   it("sets the IP address in the token", () => {
@@ -48,7 +51,10 @@ describe("createSessionToken()", () => {
 
   it("sets additional properties in the token", () => {
     const additionalProps = { prop: faker.random.alphaNumeric(12) };
-    verifiedToken = jwt.verify(util.createSessionToken(additionalProps), tokenSecret);
+    verifiedToken = jwt.verify(
+      util.createSessionToken(additionalProps),
+      tokenSecret
+    );
     expect(verifiedToken.prop).toEqual(additionalProps.prop);
   });
 });

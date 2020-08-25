@@ -36,7 +36,10 @@ function redirectRuleExample(user, context, callback) {
   }
 
   // Some kind of context check occurred to determine if a redirect should happen.
-  if (ruleUtils.canRedirect && (!user.app_metadata || !user.app_metadata.is_verified)) {
+  if (
+    ruleUtils.canRedirect &&
+    (!user.app_metadata || !user.app_metadata.is_verified)
+  ) {
     try {
       ruleUtils.doRedirect(configuration.ID_VERIFICATION_URL);
       callback(null, user, context);

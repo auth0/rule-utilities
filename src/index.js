@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
 
 const noRedirectProtocols = [
   "oauth2-resource-owner",
@@ -58,33 +57,40 @@ class Auth0RedirectRuleUtilities {
     return this.protocolCanRedirect;
   }
 
+  /**
+   * Create a signed session token with the user ID and IP address by default.
+   * Additional claims can be added as an object.
+   * These additional claims MUST NOT contain sensitive information.
+   * The Rules configuration must contain a SESSION_TOKEN_SECRET value.
+   *
+   * @param {object} additionalClaims - Object or additional, non-sensitive claims to include.
+   *
+   * @return {string} - Signed token.
+   */
   createSessionToken(additionalClaims = {}) {
-    this.user.rule_nonce = crypto.randomBytes(32).toString("hex");
-
     const sessionToken = {
       ip: this.context.request.ip,
+      iss: `https://${this.context.request.hostname}/`,
       sub: this.user.user_id,
-      nonce: this.user.rule_nonce,
-      ...additionalClaims
+      ...additionalClaims,
     };
 
-    return this.sign(sessionToken, this.tokenSecret);
+    return this.sign(sessionToken, this.tokenSecret, { expiresIn: "3d" });
   }
 
-  validateSessionToken() {
+  validateSessionToken(verifyOptions = {}) {
     const jwt = this.queryParams.sessionToken;
-    const payload = this.verify(jwt, this.tokenSecret);
-    const { nonce, sub, ...params } = payload;
+    const payload = this.verify(jwt, this.tokenSecret, {
+      ...verifyOptions,
+      subject: this.user.user_id,
+      issuer: `https://${this.context.request.hostname}/`,
+    });
 
-    if (nonce !== this.user.rule_nonce) {
-      throw new Error("Invalid session nonce");
+    if (!payload.exp) {
+      throw new Error("Expired token");
     }
 
-    if (sub !== this.user.user_id) {
-      throw new Error("Invalid user");
-    }
-
-    return params;
+    return payload;
   }
 
   doRedirect(url) {
