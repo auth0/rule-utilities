@@ -27,7 +27,7 @@ describe("validateSessionToken()", () => {
       request: {
         hostname: faker.random.alphaNumeric(12),
         query: {
-          sessionToken: signedSessionToken,
+          session_token: signedSessionToken,
         },
       },
     };
@@ -51,7 +51,7 @@ describe("validateSessionToken()", () => {
     mockUser.user_id = sessionToken.sub;
     mockContext.request.hostname = issuerHost;
     sessionToken.exp = Date.now() / 1000 - 1;
-    mockContext.request.query.sessionToken = jwt.sign(
+    mockContext.request.query.session_token = jwt.sign(
       sessionToken,
       tokenSecret
     );
@@ -64,7 +64,7 @@ describe("validateSessionToken()", () => {
   it("throws an error if the token sub does not match the user", () => {
     mockContext.request.hostname = issuerHost;
     sessionToken.exp = Date.now() / 1000 + 999;
-    mockContext.request.query.sessionToken = jwt.sign(
+    mockContext.request.query.session_token = jwt.sign(
       sessionToken,
       tokenSecret
     );
@@ -79,7 +79,7 @@ describe("validateSessionToken()", () => {
   it("throws an error if the token iss does not match host", () => {
     mockUser.user_id = sessionToken.sub;
     sessionToken.exp = Date.now() / 1000 + 999;
-    mockContext.request.query.sessionToken = jwt.sign(
+    mockContext.request.query.session_token = jwt.sign(
       sessionToken,
       tokenSecret
     );
@@ -94,7 +94,7 @@ describe("validateSessionToken()", () => {
   it("returns the validated token if checks pass", () => {
     mockContext.request.hostname = issuerHost;
     sessionToken.exp = Date.now() / 1000 + 999;
-    mockContext.request.query.sessionToken = jwt.sign(
+    mockContext.request.query.session_token = jwt.sign(
       sessionToken,
       tokenSecret
     );
