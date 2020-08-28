@@ -1,5 +1,7 @@
 # Auth0 Rule Utilities
 
+[![npm version](https://badge.fury.io/js/%40auth0%2Frule-utilities.svg)](https://badge.fury.io/js/%40auth0%2Frule-utilities)
+
 This is a collection of utilities for use in the
 [Auth0 Rules](https://auth0.com/docs/rules) pipeline.
 
