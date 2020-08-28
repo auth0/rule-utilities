@@ -18,22 +18,47 @@ class Auth0RedirectRuleUtilities {
     this.sign = jwt.sign;
   }
 
+  /**
+   * Get an existing redirect URL from context, if available.
+   *
+   * @return {string|undefined}
+   */
   get redirectUrl() {
     return this.context.redirect && this.context.redirect.url;
   }
 
+  /**
+   * Get the current query params, if any.
+   *
+   * @return {object}
+   */
   get queryParams() {
     return (this.context.request && this.context.request.query) || {};
   }
 
+  /**
+   * Determine if the current Rule protocol allows a redirect to occur.
+   *
+   * @return {boolean}
+   */
   get protocolCanRedirect() {
     return !this.noRedirectProtocols.includes(this.context.protocol);
   }
 
+  /**
+   * Determine if this Rule execution is happening on the redirect Rule callback.
+   *
+   * @return {boolean}
+   */
   get isRedirectCallback() {
     return this.context.protocol === "redirect-callback";
   }
 
+  /**
+   * Determine if the current Rule context allows for a redirect to happen.
+   *
+   * @return {boolean}
+   */
   get canRedirect() {
     // Don't redirect if someone else wants to.
     if (this.redirectUrl) {
@@ -45,11 +70,7 @@ class Auth0RedirectRuleUtilities {
       return false;
     }
 
-    // If prompt is none, don't redirect, this will throw an
-    // interaction needed error, therefore we will try to
-    // avoid this, for conditions like these, the app may
-    // just add more support for progressive profiling
-    // using <iframe> as a widget in-app.
+    // If prompt is none, this will throw an interaction needed error.
     if (this.queryParams.prompt === "none") {
       return false;
     }
@@ -78,6 +99,11 @@ class Auth0RedirectRuleUtilities {
     return this.sign(sessionToken, this.tokenSecret, { expiresIn: "3d" });
   }
 
+  /**
+   * Validate the seesion token returned in the URL.
+   *
+   * @param {object} verifyOptions - Additional options for jsonwebtoken.verify
+   */
   validateSessionToken(verifyOptions = {}) {
     const jwt = this.queryParams.sessionToken;
     const payload = this.verify(jwt, this.tokenSecret, {
@@ -93,6 +119,11 @@ class Auth0RedirectRuleUtilities {
     return payload;
   }
 
+  /**
+   * Check if redirect is possible and set the context if so.
+   *
+   * @param {sting} url
+   */
   doRedirect(url) {
     if (!this.canRedirect) {
       throw new Error("Cannot redirect");

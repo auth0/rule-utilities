@@ -23,7 +23,7 @@
     "type": "git",
     "url": "git+ssh://git@github.com/auth0/rule-utilities.git"
   },
-  "author": "",
+  "author": "Auth0 <support@auth0.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/auth0/rule-utilities/issues"
