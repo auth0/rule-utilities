@@ -19,7 +19,7 @@ function redirectRuleExample(user, context, callback) {
     configuration
   );
 
-  if (ruleUtils.isRedirectCallback && ruleUtils.queryParams.sessionToken) {
+  if (ruleUtils.isRedirectCallback && ruleUtils.queryParams.session_token) {
     // User is back from the redirect and has a session token to validate.
 
     try {
@@ -41,6 +41,8 @@ function redirectRuleExample(user, context, callback) {
     (!user.app_metadata || !user.app_metadata.is_verified)
   ) {
     try {
+      // This method automatically creates a session token.
+      // To add data to this token, use ruleUtils.createSessionToken and pass as second param below.
       ruleUtils.doRedirect(configuration.ID_VERIFICATION_URL);
       callback(null, user, context);
     } catch (error) {

@@ -44,7 +44,19 @@ describe("doRedirect()", () => {
     util.doRedirect(redirectUrl);
 
     expect(mockContext.redirect.url.split("=")[0]).toEqual(
-      `${redirectUrl}?sessionToken`
+      `${redirectUrl}?session_token`
     );
+  });
+
+  it("sets a custom session token", () => {
+    const redirectUrl = faker.internet.url();
+    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
+      SESSION_TOKEN_SECRET: tokenSecret,
+    });
+    const customSessionToken = faker.random.alphaNumeric(12);
+
+    util.doRedirect(redirectUrl, customSessionToken);
+
+    expect(mockContext.redirect.url).toEqual(`${redirectUrl}?session_token=${customSessionToken}`);
   });
 });

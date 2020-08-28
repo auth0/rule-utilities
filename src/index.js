@@ -105,7 +105,7 @@ class Auth0RedirectRuleUtilities {
    * @param {object} verifyOptions - Additional options for jsonwebtoken.verify
    */
   validateSessionToken(verifyOptions = {}) {
-    const jwt = this.queryParams.sessionToken;
+    const jwt = this.queryParams.session_token;
     const payload = this.verify(jwt, this.tokenSecret, {
       ...verifyOptions,
       subject: this.user.user_id,
@@ -122,16 +122,17 @@ class Auth0RedirectRuleUtilities {
   /**
    * Check if redirect is possible and set the context if so.
    *
-   * @param {sting} url
+   * @param {sting} url - URL to redirect to.
+   * @param {sting} url - Session token to use or omit to create one.
    */
-  doRedirect(url) {
-    if (!this.canRedirect) {
+  doRedirect(url, sessionToken) {
+    if (!this.canRedirect || !url) {
       throw new Error("Cannot redirect");
     }
 
-    const token = this.createSessionToken();
+    const token = sessionToken || this.createSessionToken();
     this.context.redirect = {
-      url: `${url}?sessionToken=${token}`,
+      url: `${url}?session_token=${token}`,
     };
   }
 }
