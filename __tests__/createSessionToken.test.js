@@ -3,6 +3,10 @@ const jwt = require("jsonwebtoken");
 
 const { Auth0RedirectRuleUtilities } = require("../src");
 
+const testClockLeeway = 60 * 1000;
+const threeDays = 3 * 24 * 60 * 60 * 1000;
+const oneHour = 60 * 60 * 1000;
+
 describe("createSessionToken()", () => {
   let mockContext;
   let mockUser;
@@ -35,8 +39,29 @@ describe("createSessionToken()", () => {
     expect(verifiedToken.sub).toEqual(mockUser.user_id);
   });
 
-  it("sets the exp in the token", () => {
-    expect(verifiedToken.exp).toBeGreaterThan(Date.now() / 1000);
+  it("sets a default exp in the token", () => {
+    expect(verifiedToken.exp).toBeGreaterThan(
+      (Date.now() + threeDays - testClockLeeway) / 1000
+    );
+    expect(verifiedToken.exp).toBeLessThan(
+      (Date.now() + threeDays + testClockLeeway) / 1000
+    );
+  });
+
+  it("sets a custom exp in the token", () => {
+    util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
+      SESSION_TOKEN_SECRET: tokenSecret,
+      SESSION_TOKEN_EXPIRES_IN: "1h",
+    });
+
+    verifiedToken = jwt.verify(util.createSessionToken(), tokenSecret);
+
+    expect(verifiedToken.exp).toBeGreaterThan(
+      (Date.now() + oneHour - testClockLeeway) / 1000
+    );
+    expect(verifiedToken.exp).toBeLessThan(
+      (Date.now() + oneHour + testClockLeeway) / 1000
+    );
   });
 
   it("sets the iss in the token", () => {

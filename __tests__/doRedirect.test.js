@@ -57,6 +57,17 @@ describe("doRedirect()", () => {
 
     util.doRedirect(redirectUrl, customSessionToken);
 
-    expect(mockContext.redirect.url).toEqual(`${redirectUrl}?session_token=${customSessionToken}`);
+    expect(mockContext.redirect.url).toEqual(
+      `${redirectUrl}?session_token=${customSessionToken}`
+    );
+  });
+
+  it("does not set a session token if false", () => {
+    const redirectUrl = faker.internet.url();
+    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext);
+
+    util.doRedirect(redirectUrl, false);
+
+    expect(mockContext.redirect.url).toEqual(redirectUrl);
   });
 });
