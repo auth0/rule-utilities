@@ -4,7 +4,8 @@
   "description": "Utility functions for use within Auth0 Rules",
   "main": "src/index.js",
   "dependencies": {
-    "jsonwebtoken": "^8.5.1"
+    "jsonwebtoken": "^8.5.1",
+    "auth0": "^2.28.0"
   },
   "devDependencies": {
     "eslint": "^7.1",
