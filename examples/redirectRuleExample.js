@@ -16,10 +16,21 @@ async function redirectRuleExample(user, context, callback) {
     Auth0UserUpdateUtilities,
   } = require("@auth0/rule-utilities@0.1.0");
 
+  /*
+  Override or set defaults for configuration values
+  const customConfiguration = {
+    ...configuration,
+    ...{
+      SESSION_TOKEN_SECRET: "custom token secret",
+      SESSION_TOKEN_EXPIRES_IN: "in seconds or a string describing a time span",
+    }
+  }
+  */
+
   const ruleUtils = new Auth0RedirectRuleUtilities(
     user,
     context,
-    configuration
+    configuration // or customConfiguration
   );
 
   const userUtils = new Auth0UserUpdateUtilities(user, auth0, "namespace");
@@ -51,6 +62,7 @@ async function redirectRuleExample(user, context, callback) {
     try {
       // This method automatically creates a session token.
       // To add data to this token, use ruleUtils.createSessionToken and pass as second param below.
+      // To omit the session token, pass false as second param below.
       ruleUtils.doRedirect(configuration.ID_VERIFICATION_URL);
       callback(null, user, context);
     } catch (error) {

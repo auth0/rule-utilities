@@ -11,8 +11,11 @@ class Auth0RedirectRuleUtilities {
   constructor(user, context, configuration) {
     this.context = context || {};
     this.user = user || {};
-    this.tokenSecret = configuration && configuration.SESSION_TOKEN_SECRET;
     this.noRedirectProtocols = noRedirectProtocols;
+
+    configuration = configuration || {};
+    this.tokenSecret = configuration.SESSION_TOKEN_SECRET;
+    this.tokenExpiresIn = configuration.SESSION_TOKEN_EXPIRES_IN || "3d";
 
     this.verify = jwt.verify;
     this.sign = jwt.sign;
@@ -96,7 +99,9 @@ class Auth0RedirectRuleUtilities {
       ...additionalClaims,
     };
 
-    return this.sign(sessionToken, this.tokenSecret, { expiresIn: "3d" });
+    return this.sign(sessionToken, this.tokenSecret, {
+      expiresIn: this.tokenExpiresIn,
+    });
   }
 
   /**
@@ -130,10 +135,11 @@ class Auth0RedirectRuleUtilities {
       throw new Error("Cannot redirect");
     }
 
-    const token = sessionToken || this.createSessionToken();
-    this.context.redirect = {
-      url: `${url}?session_token=${token}`,
-    };
+    if (sessionToken !== false) {
+      url += "?session_token=" + sessionToken || this.createSessionToken();
+    }
+
+    this.context.redirect = { url };
   }
 }
 
