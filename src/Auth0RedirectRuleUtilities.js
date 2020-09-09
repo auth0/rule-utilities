@@ -128,15 +128,24 @@ class Auth0RedirectRuleUtilities {
    * Check if redirect is possible and set the context if so.
    *
    * @param {sting} url - URL to redirect to.
-   * @param {sting} url - Session token to use or omit to create one.
+   * @param {object|undefined} options - Session token to use or omit to create one.
    */
-  doRedirect(url, sessionToken) {
+  doRedirect(url, options = {}) {
     if (!this.canRedirect || !url) {
       throw new Error("Cannot redirect");
     }
 
-    if (sessionToken !== false) {
-      url += "?session_token=" + sessionToken || this.createSessionToken();
+    const { sessionToken, generateSessionToken } = options || {};
+
+    let sessionTokenParam;
+    if (sessionToken && typeof sessionToken === "string") {
+      sessionTokenParam = sessionToken;
+    } else if (generateSessionToken === true) {
+      sessionTokenParam = this.createSessionToken();
+    }
+
+    if (sessionTokenParam) {
+      url += "?session_token=" + sessionTokenParam;
     }
 
     this.context.redirect = { url };
