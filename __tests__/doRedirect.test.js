@@ -35,15 +35,6 @@ describe("doRedirect()", () => {
     expect(error).toEqual(new Error("Cannot redirect"));
   });
 
-  it("sets the redirect URL in context", () => {
-    const redirectUrl = faker.internet.url();
-    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext);
-
-    util.doRedirect(redirectUrl);
-
-    expect(mockContext.redirect.url).toEqual(redirectUrl);
-  });
-
   it("sets a custom session token", () => {
     const redirectUrl = faker.internet.url();
     const util = new Auth0RedirectRuleUtilities(mockUser, mockContext, {
@@ -64,10 +55,19 @@ describe("doRedirect()", () => {
       SESSION_TOKEN_SECRET: tokenSecret,
     });
 
-    util.doRedirect(redirectUrl, { generateSessionToken: true });
+    util.doRedirect(redirectUrl);
 
     expect(mockContext.redirect.url.split("=")[0]).toEqual(
       `${redirectUrl}?session_token`
     );
+  });
+
+  it("sets a plain redirect URL in context", () => {
+    const redirectUrl = faker.internet.url();
+    const util = new Auth0RedirectRuleUtilities(mockUser, mockContext);
+
+    util.doRedirect(redirectUrl, { generateSessionToken: false });
+
+    expect(mockContext.redirect.url).toEqual(redirectUrl);
   });
 });
