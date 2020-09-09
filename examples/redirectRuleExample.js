@@ -1,4 +1,4 @@
-/* global configuration */
+/* global configuration, auth0 */
 
 /**
  * Exmaple Rule to redirect for verification and store the result in the user meta.
@@ -10,14 +10,19 @@
  * @param {object} context
  * @param {function} callback
  */
-function redirectRuleExample(user, context, callback) {
-  const { Auth0RedirectRuleUtilities } = require("@auth0/rule-utilities@0.1.0");
+async function redirectRuleExample(user, context, callback) {
+  const {
+    Auth0RedirectRuleUtilities,
+    Auth0UserUpdateUtilities,
+  } = require("@auth0/rule-utilities@0.1.0");
 
   const ruleUtils = new Auth0RedirectRuleUtilities(
     user,
     context,
     configuration
   );
+
+  const userUtils = new Auth0UserUpdateUtilities(user, auth0, "namespace");
 
   if (ruleUtils.isRedirectCallback && ruleUtils.queryParams.session_token) {
     // User is back from the redirect and has a session token to validate.
@@ -30,16 +35,19 @@ function redirectRuleExample(user, context, callback) {
 
     // ... do something with POSTed or param data ...
 
-    user.app_metadata = user.app_metadata || {};
-    user.app_metadata.is_verified = true;
+    userUtils.setAppMeta("is_verified", true);
+
+    try {
+      await userUtils.updateAppMeta();
+    } catch (error) {
+      callback(error);
+    }
+
     callback(null, user, context);
   }
 
   // Some kind of context check occurred to determine if a redirect should happen.
-  if (
-    ruleUtils.canRedirect &&
-    (!user.app_metadata || !user.app_metadata.is_verified)
-  ) {
+  if (ruleUtils.canRedirect && !userUtils.setAppMeta("is_verified")) {
     try {
       // This method automatically creates a session token.
       // To add data to this token, use ruleUtils.createSessionToken and pass as second param below.
