@@ -60,6 +60,14 @@ describe("Auth0UserUpdateUtilities", () => {
       expect(util.user.user_metadata["namespace"][propName]).toEqual(propValue);
       expect(user.user_metadata["namespace"][propName]).toEqual(propValue);
     });
+
+    it("replaces namespaced property", () => {
+      util = new Auth0UserUpdateUtilities(user, auth0, "namespace");
+      const propValue = faker.random.alphaNumeric();
+      util.setUserMeta("namespace", propValue);
+      expect(util.user.user_metadata["namespace"]).toEqual(propValue);
+      expect(user.user_metadata["namespace"]).toEqual(propValue);
+    });
   });
 
   describe("setAppMeta", () => {
@@ -79,6 +87,14 @@ describe("Auth0UserUpdateUtilities", () => {
       expect(util.user.app_metadata["namespace"][propName]).toEqual(propValue);
       expect(user.app_metadata["namespace"][propName]).toEqual(propValue);
     });
+
+    it("replaces namespaced property", () => {
+      util = new Auth0UserUpdateUtilities(user, auth0, "namespace");
+      const propValue = faker.random.alphaNumeric();
+      util.setAppMeta("namespace", propValue);
+      expect(util.user.app_metadata["namespace"]).toEqual(propValue);
+      expect(user.app_metadata["namespace"]).toEqual(propValue);
+    });
   });
 
   describe("getUserMeta", () => {
@@ -90,6 +106,13 @@ describe("Auth0UserUpdateUtilities", () => {
       util = new Auth0UserUpdateUtilities(user, auth0, "namespace");
       expect(util.getUserMeta("prop")).toEqual(
         user.user_metadata.namespace.prop
+      );
+    });
+
+    it("gets complete namespace property", () => {
+      util = new Auth0UserUpdateUtilities(user, auth0, "namespace");
+      expect(util.getUserMeta("namespace")).toEqual(
+        user.user_metadata.namespace
       );
     });
 
@@ -108,37 +131,44 @@ describe("Auth0UserUpdateUtilities", () => {
       expect(util.getAppMeta("prop")).toEqual(user.app_metadata.namespace.prop);
     });
 
+    it("gets complete namespace property", () => {
+      util = new Auth0UserUpdateUtilities(user, auth0, "namespace");
+      expect(util.getUserMeta("namespace")).toEqual(
+        user.user_metadata.namespace
+      );
+    });
+
     it("gets empty metadata", () => {
       expect(util.getAppMeta(faker.random.alphaNumeric(12))).toBeUndefined();
     });
   });
 
   describe("updateUser", () => {
-    it("calls updateUser with the correct data", () => {
+    it("calls updateUser with the correct data", async () => {
       util.userId = faker.random.alphaNumeric(12);
       util.updatedUserData = { nickname: faker.random.word() };
       util.updateUser();
-      expect(util.apiClient.updateUser).toHaveBeenCalledWith(
+      expect(await util.apiClient.updateUser).toHaveBeenCalledWith(
         { id: util.userId },
         util.updatedUserData
       );
     });
   });
 
-  describe("updateUserMetadata", () => {
-    it("calls updateUserMetadata with the correct data", () => {
-      util.updateUserMetadata();
-      expect(util.apiClient.updateUserMetadata).toHaveBeenCalledWith(
+  describe("updateUserMeta", () => {
+    it("calls updateUserMeta with the correct data", async () => {
+      util.updateUserMeta();
+      expect(await util.apiClient.updateUserMetadata).toHaveBeenCalledWith(
         { id: util.userId },
         util.user.user_metadata
       );
     });
   });
 
-  describe("updateAppMetadata", () => {
-    it("calls updateAppMetadata with the correct data", () => {
-      util.updateAppMetadata();
-      expect(util.apiClient.updateAppMetadata).toHaveBeenCalledWith(
+  describe("updateAppMeta", () => {
+    it("calls updateAppMeta with the correct data", async () => {
+      util.updateAppMeta();
+      expect(await util.apiClient.updateAppMetadata).toHaveBeenCalledWith(
         { id: util.userId },
         util.user.app_metadata
       );

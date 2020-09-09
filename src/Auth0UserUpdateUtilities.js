@@ -33,7 +33,7 @@ class Auth0UserUpdateUtilities {
   }
 
   setUserMeta(key, value) {
-    if (this.isNamespaced) {
+    if (this.isNamespaced && key !== this.namespace) {
       this.user.user_metadata[this.namespace][key] = value;
     } else {
       this.user.user_metadata[key] = value;
@@ -41,7 +41,7 @@ class Auth0UserUpdateUtilities {
   }
 
   setAppMeta(key, value) {
-    if (this.isNamespaced) {
+    if (this.isNamespaced && key !== this.namespace) {
       this.user.app_metadata[this.namespace][key] = value;
     } else {
       this.user.app_metadata[key] = value;
@@ -49,42 +49,33 @@ class Auth0UserUpdateUtilities {
   }
 
   getUserMeta(key) {
-    return this.isNamespaced
+    return this.isNamespaced && key !== this.namespace
       ? this.user.user_metadata[this.namespace][key]
       : this.user.user_metadata[key];
   }
 
   getAppMeta(key) {
-    return this.isNamespaced
+    return this.isNamespaced && key !== this.namespace
       ? this.user.app_metadata[this.namespace][key]
       : this.user.app_metadata[key];
   }
 
-  updateUser() {
-    (async () => {
-      await this.apiClient.updateUser(
-        { id: this.userId },
-        this.updatedUserData
-      );
-    })();
+  async updateUser() {
+    await this.apiClient.updateUser({ id: this.userId }, this.updatedUserData);
   }
 
-  updateUserMetadata() {
-    (async () => {
-      await this.apiClient.updateUserMetadata(
-        { id: this.userId },
-        this.user.user_metadata
-      );
-    })();
+  async updateUserMeta() {
+    await this.apiClient.updateUserMetadata(
+      { id: this.userId },
+      this.user.user_metadata
+    );
   }
 
-  updateAppMetadata() {
-    (async () => {
-      await this.apiClient.updateAppMetadata(
-        { id: this.userId },
-        this.user.app_metadata
-      );
-    })();
+  async updateAppMeta() {
+    await this.apiClient.updateAppMetadata(
+      { id: this.userId },
+      this.user.app_metadata
+    );
   }
 }
 
