@@ -135,7 +135,7 @@ class Auth0RedirectRuleUtilities {
       throw new Error("Cannot redirect");
     }
 
-    const { sessionToken, generateSessionToken } = options || {};
+    const { sessionToken, generateSessionToken = true } = options || {};
 
     let sessionTokenParam;
     if (sessionToken && typeof sessionToken === "string") {
