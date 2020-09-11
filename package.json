@@ -1,6 +1,6 @@
 {
   "name": "@auth0/rule-utilities",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Utility functions for use within Auth0 Rules",
   "main": "src/index.js",
   "dependencies": {
@@ -26,8 +26,5 @@
   },
   "author": "Auth0 <support@auth0.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/auth0/rule-utilities/issues"
-  },
   "homepage": "https://github.com/auth0/rule-utilities#readme"
 }
