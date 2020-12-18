@@ -16,6 +16,7 @@
  * @param {function} callback
  */
 async function getRiskScoreFromApiExample(user, context, callback) {
+
   // TODO: Update with integration-specific namespace.
   if (!configuration.NAMESPACE_API_KEY) {
     console.log("Missing required configuration. Skipping.");
@@ -23,14 +24,15 @@ async function getRiskScoreFromApiExample(user, context, callback) {
   }
 
   // OPTIONAL: check the Application metadata to see if this API should be skipped.
-  if (context.clientMetadata.getUserDataFromApi === "false") {
+  const { clientMetadata } = context;
+  if ( clientMetadata && clientMetadata.getUserDataFromApi === "false" ) {
     return callback(null, user, context);
   }
 
+  const { Auth0UserUpdateUtilities } = require("@auth0/rule-utilities@0.2.0");
+
   // TODO: Update with integration-specific namespace.
-  const userUtils = new require(
-    "@auth0/rule-utilities@0.2.0"
-  ).Auth0UserUpdateUtilities(user, auth0, "namespace");
+  const userUtils = new Auth0UserUpdateUtilities(user, auth0, "namespace");
 
   const axios = require("axios@0.19.2");
 
@@ -87,6 +89,7 @@ async function getRiskScoreFromApiExample(user, context, callback) {
   }
 
   // TODO: Update with integration-specific namespace.
+  // https://auth0.com/docs/tokens/create-namespaced-custom-claims
   if (configuration.NAMESPACE_TOKEN_CLAIM) {
     context.idToken[configuration.NAMESPACE_TOKEN_CLAIM] = riskScore;
     context.accessToken[configuration.NAMESPACE_TOKEN_CLAIM] = riskScore;

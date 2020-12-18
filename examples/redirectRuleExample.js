@@ -14,7 +14,7 @@ async function redirectRuleExample(user, context, callback) {
   const {
     Auth0RedirectRuleUtilities,
     Auth0UserUpdateUtilities,
-  } = require("@auth0/rule-utilities@0.1.0");
+  } = require("@auth0/rule-utilities@0.2.0");
 
   /*
   Override or set defaults for configuration values
