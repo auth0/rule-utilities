@@ -58,11 +58,11 @@ async function redirectRuleExample(user, context, callback) {
   }
 
   // Some kind of context check occurred to determine if a redirect should happen.
-  if (ruleUtils.canRedirect && !userUtils.setAppMeta("is_verified")) {
+  if (ruleUtils.canRedirect && !userUtils.getAppMeta("is_verified")) {
     try {
       // This method automatically creates a session token.
-      // To add data to this token, use ruleUtils.createSessionToken and pass as second param below.
-      // To omit the session token, pass false as second param below.
+      // To add data to this token, use ruleUtils.createSessionToken and pass { sessionToken: yourSessionToken } as second param below.
+      // To omit the session token, pass { generateSessionToken: false } as second param below.
       ruleUtils.doRedirect(configuration.ID_VERIFICATION_URL);
       callback(null, user, context);
     } catch (error) {
